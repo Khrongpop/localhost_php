@@ -1,0 +1,40 @@
+version: "3"
+services:
+    db:
+        image: mariadb:latest
+        container_name: localhost_mariadb
+        restart: always
+        volumes:
+            - ./mysql/initdb/:/docker-entrypoint-initdb.d
+            - ./mysql/data/:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            # - MYSQL_DATABASE=localhost_db
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=root
+    php:
+        image: php:8.0.0-fpm-alpine
+        # build: ./
+        container_name: localhost_php-fpm
+        restart: always
+        volumes:
+            - ./www/:/var/www/html
+        expose:
+            - "9000"
+    nginx:
+        image: nginx:alpine
+        container_name: localhost_nginx
+        restart: always
+        volumes:
+            - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+            - ./nginx/conf.d:/etc/nginx/conf.d:ro
+        volumes_from:
+            - php
+        ports:
+            - 80:80
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: localhost-phpmyadmin
+        restart: always
+        ports:
+            - 90:80
